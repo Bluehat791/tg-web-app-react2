@@ -1,0 +1,177 @@
+.product-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 15px;
+    margin: 10px;
+    width: 280px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+}
+
+.product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.product-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.product-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    color: #333;
+    font-weight: 600;
+}
+
+.description {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+    flex-grow: 1;
+    line-height: 1.4;
+}
+
+.price {
+    font-size: 20px;
+    font-weight: bold;
+    color: #e44d26;
+    margin: 10px 0;
+    padding: 5px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+.ingredients-toggle {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.ingredients-toggle:hover {
+    background: #ebebeb;
+}
+
+.ingredients-section {
+    margin: 10px 0;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.ingredients-section h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.removable-ingredients,
+.additional-ingredients {
+    margin-bottom: 15px;
+}
+
+.ingredient-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.ingredient-item input[type="checkbox"] {
+    margin: 0;
+}
+
+.ingredient-item.removable {
+    color: #e44d26;
+}
+
+.add-to-cart {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: auto;
+    transition: background-color 0.2s;
+}
+
+.add-to-cart:hover {
+    background: #45a049;
+}
+
+.recipe-toggle {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    padding: 8px;
+    margin: 5px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.recipe-section {
+    margin: 10px 0;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.recipe-section h4 {
+    margin: 10px 0 5px;
+    color: #333;
+}
+
+.cooking-time, .serving-size {
+    color: #666;
+    margin: 5px 0;
+}
+
+.recipe-ingredients {
+    list-style-type: disc;
+    margin-left: 20px;
+}
+
+.recipe-steps {
+    margin-left: 20px;
+}
+
+.recipe-ingredients li, .recipe-steps li {
+    margin: 5px 0;
+}
+
+.no-image {
+    width: 100%;
+    height: 200px;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    border-radius: 8px;
+    margin-bottom: 15px;
+} 
