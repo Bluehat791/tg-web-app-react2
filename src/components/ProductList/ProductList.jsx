@@ -151,12 +151,10 @@ const ProductList = () => {
                 <div className="user-info">
                     <img 
                         src={user?.photo_url || '/default-avatar.png'} 
-                        alt={user?.username} 
+                        alt="User" 
                         className="user-avatar"
                     />
-                    <span className="username">
-                        {user?.username || 'Гость'}
-                    </span>
+                    <span className="username">{user?.username || 'Гость'}</span>
                 </div>
                 <div className="cart-info" onClick={() => setIsCartOpen(true)}>
                     {cart.length > 0 && (
