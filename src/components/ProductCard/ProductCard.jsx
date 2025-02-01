@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import './ProductCard.css';
 
 const ProductCard = ({ product, onAddToCart }) => {
     const [selectedIngredients, setSelectedIngredients] = useState([]);
     const [removedIngredients, setRemovedIngredients] = useState([]);
-    const [showIngredients, setShowIngredients] = useState(false);
+    const [isAdded, setIsAdded] = useState(false);
+    const [showDetails, setShowDetails] = useState(false);
 
     const toggleIngredient = (ingredient) => {
         setSelectedIngredients(prev => {
@@ -30,44 +32,116 @@ const ProductCard = ({ product, onAddToCart }) => {
         return basePrice + additionsPrice;
     };
 
+    const handleAddToCart = () => {
+        const finalProduct = {
+            ...product,
+            finalPrice: calculateTotalPrice(),
+            addedIngredients: selectedIngredients,
+            removedIngredients: removedIngredients
+        };
+        
+        setIsAdded(true);
+        onAddToCart(finalProduct);
+        
+        // Сброс анимации
+        setTimeout(() => setIsAdded(false), 300);
+    };
+
     console.log('Product data:', product);
     console.log('Removable ingredients:', product.removableIngredients);
 
     return (
-        <div className="product-card">
-            <img src={product.photoUrl} alt={product.name} />
-            <h3>{product.name}</h3>
-            <p>{product.description}</p>
-            <p>Цена: {product.price}₽</p>
-            
-            {/* Дополнительные ингредиенты */}
-            {product.ingredients.length > 0 && (
-                <div className="ingredients">
-                    <h4>Дополнительно:</h4>
-                    {product.ingredients.map(ing => (
-                        <label key={ing.id}>
-                            <input type="checkbox" />
-                            {ing.name} (+{ing.price}₽)
-                        </label>
-                    ))}
-                </div>
+        <motion.div 
+            className="product-card"
+            whileHover={{ y: -5 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+        >
+            {product.popular && (
+                <motion.span 
+                    className="popular-badge"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                >
+                    🔥 Популярное
+                </motion.span>
             )}
             
-            {/* Ингредиенты, которые можно убрать */}
-            {product.removableIngredients.length > 0 && (
-                <div className="removable">
-                    <h4>Убрать:</h4>
-                    {product.removableIngredients.map(ing => (
-                        <label key={ing.id}>
-                            <input type="checkbox" />
-                            {ing.name}
-                        </label>
-                    ))}
+            <div className="image-container">
+                <img src={product.photoUrl} alt={product.name} />
+                <div className="image-overlay">
+                    <button 
+                        className="details-btn"
+                        onClick={() => setShowDetails(true)}
+                    >
+                        Подробнее
+                    </button>
                 </div>
-            )}
-            
-            <button>Добавить в корзину</button>
-        </div>
+            </div>
+
+            <div className="product-content">
+                <h3>{product.name}</h3>
+                <p className="description">{product.description}</p>
+                <motion.div 
+                    className="price"
+                    whileHover={{ scale: 1.05 }}
+                >
+                    {calculateTotalPrice()}₽
+                </motion.div>
+                
+                <AnimatePresence>
+                    {showDetails && (
+                        <motion.div 
+                            className="details-modal"
+                            initial={{ opacity: 0, y: 50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 50 }}
+                        >
+                            <button 
+                                className="close-btn"
+                                onClick={() => setShowDetails(false)}
+                            >
+                                ✕
+                            </button>
+                            
+                            {/* Ингредиенты */}
+                            <div className="ingredients-section">
+                                <h4>Дополнительно:</h4>
+                                {product.ingredients.map(ing => (
+                                    <div key={ing.id} className="ingredient-item">
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedIngredients.some(i => i.id === ing.id)}
+                                                onChange={() => toggleIngredient(ing)}
+                                            />
+                                            <span>{ing.name}</span>
+                                            <span className="price-tag">+{ing.price}₽</span>
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            {/* Дополнительная информация */}
+                            <div className="additional-info">
+                                <span className="calories">🔥 {product.calories || '300'} ккал</span>
+                                <span className="cooking-time">⏱️ {product.cookingTime || '15 мин'}</span>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+                
+                <motion.button 
+                    className={`add-to-cart-btn ${isAdded ? 'added' : ''}`}
+                    onClick={handleAddToCart}
+                    whileTap={{ scale: 0.95 }}
+                >
+                    {isAdded ? '✓ Добавлено' : 'Добавить в корзину'}
+                </motion.button>
+            </div>
+        </motion.div>
     );
 };
 
