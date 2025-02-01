@@ -7,6 +7,7 @@ const ProductCard = ({ product, onAddToCart }) => {
     const [removedIngredients, setRemovedIngredients] = useState([]);
     const [isAdded, setIsAdded] = useState(false);
     const [showDetails, setShowDetails] = useState(false);
+    const [isFavorite, setIsFavorite] = useState(false);
 
     const toggleIngredient = (ingredient) => {
         setSelectedIngredients(prev => {
@@ -127,7 +128,12 @@ const ProductCard = ({ product, onAddToCart }) => {
                             {/* Дополнительная информация */}
                             <div className="additional-info">
                                 <span className="calories">🔥 {product.calories || '300'} ккал</span>
-                                <span className="cooking-time">⏱️ {product.cookingTime || '15 мин'}</span>
+                                <div className="cooking-info">
+                                    <span className="cooking-time">⏱️ {product.cookingTime || '15-20'} мин</span>
+                                    {product.isPreparingNow && (
+                                        <span className="preparing-now">👨‍🍳 Готовится</span>
+                                    )}
+                                </div>
                             </div>
                         </motion.div>
                     )}
@@ -140,6 +146,19 @@ const ProductCard = ({ product, onAddToCart }) => {
                 >
                     {isAdded ? '✓ Добавлено' : 'Добавить в корзину'}
                 </motion.button>
+
+                <button 
+                    className={`favorite-btn ${isFavorite ? 'active' : ''}`}
+                    onClick={() => setIsFavorite(!isFavorite)}
+                >
+                    {isFavorite ? '❤️' : '🤍'}
+                </button>
+
+                <div className="quick-actions">
+                    <button onClick={() => tg.shareUrl(`Попробуй ${product.name}!`)}>
+                        📤 Поделиться
+                    </button>
+                </div>
             </div>
         </motion.div>
     );

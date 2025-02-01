@@ -5,6 +5,7 @@ import OrderModal from '../OrderModal/OrderModal';
 import { useTelegram } from '../hooks/useTelegram';
 import { motion } from 'framer-motion';
 import Cart from '../Cart/Cart';
+import OrderHistory from '../OrderHistory/OrderHistory';
 
 const ProductList = () => {
     const [products, setProducts] = useState({
@@ -18,6 +19,10 @@ const ProductList = () => {
     const [activeCategory, setActiveCategory] = useState('all');
     const { tg, user } = useTelegram();
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortType, setSortType] = useState('default');
+    const [isLoading, setIsLoading] = useState(true);
+    const [activeTags, setActiveTags] = useState([]);
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -52,6 +57,7 @@ const ProductList = () => {
     }, []);
 
     const fetchProducts = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch('http://localhost:8000/api/products');
             const data = await response.json();
@@ -59,6 +65,8 @@ const ProductList = () => {
             setProducts(data);
         } catch (error) {
             console.error('Error fetching products:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -145,6 +153,39 @@ const ProductList = () => {
         updateMainButton();
     };
 
+    const toggleTag = (tag) => {
+        if (activeTags.includes(tag)) {
+            setActiveTags(prev => prev.filter(t => t !== tag));
+        } else {
+            setActiveTags(prev => [...prev, tag]);
+        }
+    };
+
+    const getTimeBasedProducts = () => {
+        const hour = new Date().getHours();
+        if (hour >= 6 && hour < 11) {
+            return <div className="time-suggestion">🌅 Идеально для завтрака</div>;
+        } else if (hour >= 11 && hour < 16) {
+            return <div className="time-suggestion">🌞 Время обеда</div>;
+        } else if (hour >= 16 && hour < 22) {
+            return <div className="time-suggestion">🌆 Отличный ужин</div>;
+        }
+        return <div className="time-suggestion">🌙 Ночной перекус</div>;
+    };
+
+    const getRecommendations = (currentProduct) => {
+        return products.filter(p => 
+            p.category === currentProduct.category && 
+            p.id !== currentProduct.id
+        ).slice(0, 3);
+    };
+
+    const handleReorder = (products) => {
+        products.forEach(product => {
+            handleAddToCart(product);
+        });
+    };
+
     return (
         <div className="product-list-container">
             <header className="product-list-header">
@@ -163,6 +204,45 @@ const ProductList = () => {
                     <span className="cart-icon">🛒</span>
                 </div>
             </header>
+
+            <div className="search-bar">
+                <input
+                    type="text"
+                    placeholder="Поиск блюд..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            </div>
+
+            <div className="quick-filters">
+                <div 
+                    className={`filter-tag ${activeTags.includes('popular') ? 'active' : ''}`}
+                    onClick={() => toggleTag('popular')}
+                >
+                    🔥 Популярное
+                </div>
+                <div 
+                    className={`filter-tag ${activeTags.includes('spicy') ? 'active' : ''}`}
+                    onClick={() => toggleTag('spicy')}
+                >
+                    🌶️ Острое
+                </div>
+                <div 
+                    className={`filter-tag ${activeTags.includes('new') ? 'active' : ''}`}
+                    onClick={() => toggleTag('new')}
+                >
+                    🆕 Новинки
+                </div>
+            </div>
+
+            <div className="sort-controls">
+                <select value={sortType} onChange={(e) => setSortType(e.target.value)}>
+                    <option value="default">По умолчанию</option>
+                    <option value="priceAsc">Сначала дешевле</option>
+                    <option value="priceDesc">Сначала дороже</option>
+                    <option value="nameAsc">По названию А-Я</option>
+                </select>
+            </div>
 
             <nav className="category-nav">
                 <button 
@@ -203,25 +283,38 @@ const ProductList = () => {
                 initial="hidden"
                 animate="visible"
             >
-                {Object.entries(products).map(([category, items]) => (
-                    (activeCategory === 'all' || activeCategory === category) && (
-                        <motion.section 
-                            key={category}
-                            variants={itemVariants}
-                        >
-                            <h2>{getCategoryTitle(category)}</h2>
-                            <div className="products-grid">
-                                {items.map(product => (
-                                    <ProductCard 
-                                        key={product.id}
-                                        product={product}
-                                        onAddToCart={handleAddToCart}
-                                    />
-                                ))}
-                            </div>
-                        </motion.section>
-                    )
-                ))}
+                {isLoading ? (
+                    <div className="loading-skeleton">
+                        {[1,2,3,4].map(i => (
+                            <div key={i} className="skeleton-card" />
+                        ))}
+                    </div>
+                ) : (
+                    Object.entries(products).map(([category, items]) => {
+                        const filteredItems = items.filter(item => 
+                            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            item.description.toLowerCase().includes(searchQuery.toLowerCase())
+                        );
+                        
+                        return (activeCategory === 'all' || activeCategory === category) && (
+                            <motion.section 
+                                key={category}
+                                variants={itemVariants}
+                            >
+                                <h2>{getCategoryTitle(category)}</h2>
+                                <div className="products-grid">
+                                    {filteredItems.map(product => (
+                                        <ProductCard 
+                                            key={product.id}
+                                            product={product}
+                                            onAddToCart={handleAddToCart}
+                                        />
+                                    ))}
+                                </div>
+                            </motion.section>
+                        );
+                    })
+                )}
             </motion.div>
 
             <OrderModal
@@ -240,6 +333,8 @@ const ProductList = () => {
                 onRemoveItem={handleRemoveFromCart}
                 onUpdateQuantity={handleUpdateQuantity}
             />
+
+            <OrderHistory onReorder={handleReorder} />
         </div>
     );
 };
