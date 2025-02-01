@@ -35,75 +35,38 @@ const ProductCard = ({ product, onAddToCart }) => {
 
     return (
         <div className="product-card">
-            {product.photoUrl ? (
-                <img src={product.photoUrl} alt={product.name} />
-            ) : (
-                <div className="no-image">Нет фото</div>
+            <img src={product.photoUrl} alt={product.name} />
+            <h3>{product.name}</h3>
+            <p>{product.description}</p>
+            <p>Цена: {product.price}₽</p>
+            
+            {/* Дополнительные ингредиенты */}
+            {product.ingredients.length > 0 && (
+                <div className="ingredients">
+                    <h4>Дополнительно:</h4>
+                    {product.ingredients.map(ing => (
+                        <label key={ing.id}>
+                            <input type="checkbox" />
+                            {ing.name} (+{ing.price}₽)
+                        </label>
+                    ))}
+                </div>
             )}
-            <div className="product-info">
-                <h3>{product.name}</h3>
-                <p className="description">{product.description}</p>
-                <p className="price">{calculateTotalPrice()} ₽</p>
-
-                {(Array.isArray(product.ingredients) && product.ingredients.length > 0 || 
-                 Array.isArray(product.removableIngredients) && product.removableIngredients.length > 0) && (
-                    <button 
-                        className="ingredients-toggle"
-                        onClick={() => setShowIngredients(!showIngredients)}
-                    >
-                        {showIngredients ? 'Скрыть состав' : 'Показать состав'}
-                    </button>
-                )}
-
-                {showIngredients && (
-                    <div className="ingredients-section">
-                        {Array.isArray(product.removableIngredients) && 
-                         product.removableIngredients.length > 0 && (
-                            <div className="removable-ingredients">
-                                <h4>Убрать из состава:</h4>
-                                {product.removableIngredients.map(ing => (
-                                    <label key={ing.id} className="ingredient-item removable">
-                                        <input
-                                            type="checkbox"
-                                            checked={removedIngredients.some(i => i.id === ing.id)}
-                                            onChange={() => toggleRemoveIngredient(ing)}
-                                        />
-                                        {ing.name}
-                                    </label>
-                                ))}
-                            </div>
-                        )}
-
-                        {Array.isArray(product.ingredients) && product.ingredients.length > 0 && (
-                            <div className="additional-ingredients">
-                                <h4>Добавить в состав:</h4>
-                                {product.ingredients.map(ing => (
-                                    <label key={ing.id} className="ingredient-item">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedIngredients.some(i => i.id === ing.id)}
-                                            onChange={() => toggleIngredient(ing)}
-                                        />
-                                        {ing.name} (+{ing.price}₽)
-                                    </label>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                <button 
-                    className="add-to-cart"
-                    onClick={() => onAddToCart({
-                        ...product,
-                        finalPrice: calculateTotalPrice(),
-                        addedIngredients: selectedIngredients,
-                        removedIngredients: removedIngredients
-                    })}
-                >
-                    В корзину
-                </button>
-            </div>
+            
+            {/* Ингредиенты, которые можно убрать */}
+            {product.removableIngredients.length > 0 && (
+                <div className="removable">
+                    <h4>Убрать:</h4>
+                    {product.removableIngredients.map(ing => (
+                        <label key={ing.id}>
+                            <input type="checkbox" />
+                            {ing.name}
+                        </label>
+                    ))}
+                </div>
+            )}
+            
+            <button>Добавить в корзину</button>
         </div>
     );
 };
