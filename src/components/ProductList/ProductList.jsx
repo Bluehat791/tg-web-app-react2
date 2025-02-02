@@ -6,6 +6,7 @@ import { useTelegram } from '../hooks/useTelegram';
 import { motion } from 'framer-motion';
 import Cart from '../Cart/Cart';
 import OrderHistory from '../OrderHistory/OrderHistory';
+import { db } from '../../db/database';
 
 const API_URL = 'https://your-server-domain.com'; // Замените на ваш домен сервера
 
@@ -61,13 +62,48 @@ const ProductList = ({ isAdmin }) => {
     const fetchProducts = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch('http://localhost:8000/api/products');
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const data = await response.json();
-            console.log('Received products from API:', data);
-            setProducts(data);
+            // Получаем продукты напрямую из базы данных
+            const productsData = await db.query(`
+                SELECT p.*, c.slug as category
+                FROM products p
+                JOIN categories c ON p.category_id = c.id
+            `);
+
+            // Получаем ингредиенты для продуктов
+            const productIngredients = await db.query(`
+                SELECT pi.*, i.name, i.price 
+                FROM product_ingredients pi
+                JOIN ingredients i ON pi.ingredient_id = i.id
+            `);
+
+            // Группируем продукты по категориям
+            const groupedProducts = {
+                snacks: [],
+                mainMenu: [],
+                drinks: [],
+                sauces: []
+            };
+
+            productsData.forEach(product => {
+                const productIngrs = productIngredients.filter(pi => pi.product_id === product.id);
+                
+                const formattedProduct = {
+                    id: product.id,
+                    name: product.name,
+                    price: parseFloat(product.price),
+                    description: product.description,
+                    photoId: product.photo_id,
+                    photoUrl: product.photo_url,
+                    ingredients: productIngrs.filter(pi => !pi.is_removable),
+                    removableIngredients: productIngrs.filter(pi => pi.is_removable)
+                };
+
+                if (groupedProducts[product.category]) {
+                    groupedProducts[product.category].push(formattedProduct);
+                }
+            });
+
+            setProducts(groupedProducts);
         } catch (error) {
             console.error('Error fetching products:', error);
         } finally {
