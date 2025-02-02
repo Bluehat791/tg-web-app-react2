@@ -7,6 +7,8 @@ import { motion } from 'framer-motion';
 import Cart from '../Cart/Cart';
 import OrderHistory from '../OrderHistory/OrderHistory';
 
+const API_URL = 'https://your-server-domain.com'; // Замените на ваш домен сервера
+
 const ProductList = () => {
     const [products, setProducts] = useState({
         snacks: [],
@@ -59,7 +61,7 @@ const ProductList = () => {
     const fetchProducts = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch('http://localhost:8000/api/products');
+            const response = await fetch(`${API_URL}/api/products`);
             const data = await response.json();
             console.log('Received products:', data);
             setProducts(data);
@@ -99,7 +101,7 @@ const ProductList = () => {
         });
 
         try {
-            const response = await fetch('http://localhost:8000/web-data', {
+            const response = await fetch(`${API_URL}/web-data`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

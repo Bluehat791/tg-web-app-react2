@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './OrderHistory.css';
 
+const API_URL = 'https://your-server-domain.com'; // Замените на ваш домен сервера
+
 const OrderHistory = ({ onReorder }) => {
     const [orders, setOrders] = useState([]);
     const [isVisible, setIsVisible] = useState(false);
@@ -13,7 +15,7 @@ const OrderHistory = ({ onReorder }) => {
 
     const fetchUserOrders = async () => {
         try {
-            const response = await fetch('http://localhost:8000/api/orders');
+            const response = await fetch(`${API_URL}/api/orders`);
             const data = await response.json();
             setOrders(data);
         } catch (error) {
