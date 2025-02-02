@@ -9,7 +9,7 @@ import OrderHistory from '../OrderHistory/OrderHistory';
 
 const API_URL = 'https://your-server-domain.com'; // Замените на ваш домен сервера
 
-const ProductList = () => {
+const ProductList = ({ isAdmin }) => {
     const [products, setProducts] = useState({
         snacks: [],
         mainMenu: [],
@@ -61,9 +61,12 @@ const ProductList = () => {
     const fetchProducts = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(`${API_URL}/api/products`);
+            const response = await fetch('http://localhost:8000/api/products');
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
             const data = await response.json();
-            console.log('Received products:', data);
+            console.log('Received products from API:', data);
             setProducts(data);
         } catch (error) {
             console.error('Error fetching products:', error);
@@ -188,6 +191,22 @@ const ProductList = () => {
         });
     };
 
+    const handleDelete = async (category, id) => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/products/${category}/${id}`, {
+                method: 'DELETE'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Error deleting product');
+            }
+            
+            fetchProducts();
+        } catch (error) {
+            console.error('Error deleting product:', error);
+        }
+    };
+
     return (
         <div className="product-list-container">
             <header className="product-list-header">
@@ -309,7 +328,9 @@ const ProductList = () => {
                                         <ProductCard 
                                             key={product.id}
                                             product={product}
+                                            isAdmin={isAdmin}
                                             onAddToCart={handleAddToCart}
+                                            onDelete={() => handleDelete(category, product.id)}
                                         />
                                     ))}
                                 </div>
